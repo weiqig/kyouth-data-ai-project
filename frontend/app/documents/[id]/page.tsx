@@ -42,6 +42,15 @@ function formatDate(value?: string | null) {
   return new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value));
 }
 
+function formatAuditTime(value?: string | null) {
+  if (!value) return { time: '—', date: '' };
+  const date = new Date(value);
+  return {
+    time: new Intl.DateTimeFormat(undefined, { hour: '2-digit', minute: '2-digit' }).format(date),
+    date: new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric' }).format(date),
+  };
+}
+
 function statusLabel(status: string) {
   return status.replaceAll('_', ' ');
 }
@@ -140,6 +149,10 @@ export default function DocumentPage() {
 
   const reviewCount = useMemo(() => doc?.extractions.filter((x) => x.needs_review).length || 0, [doc]);
   const unacceptedCount = useMemo(() => doc?.extractions.filter((x) => !x.accepted).length || 0, [doc]);
+  const sortedAuditLogs = useMemo(
+    () => [...auditLogs].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()),
+    [auditLogs],
+  );
 
   if (!doc) return <main><p className="emptyState">Loading document from PostgreSQL...</p></main>;
 
@@ -284,15 +297,23 @@ export default function DocumentPage() {
       <section className="card">
         <h2>Audit trail</h2>
         <div className="auditList">
-          {auditLogs.map((log) => (
-            <div key={log.id} className="auditItem">
-              <span className="auditDot" />
-              <div>
-                <strong>{log.action}</strong> <span className="muted">by {log.actor} • {formatDate(log.created_at)}</span>
-                <p>{log.details}</p>
+          {sortedAuditLogs.map((log) => {
+            const auditTime = formatAuditTime(log.created_at);
+            return (
+              <div key={log.id} className="auditItem">
+                <div className="auditTime">
+                  <strong>{auditTime.time}</strong>
+                  <span>{auditTime.date}</span>
+                </div>
+                <span className="auditDot" />
+                <div className="auditContent">
+                  <strong>{log.action}</strong> <span className="muted">by {log.actor}</span>
+                  <p>{log.details}</p>
+                  <span className="muted compact">{formatDate(log.created_at)}</span>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </section>
     </main>
