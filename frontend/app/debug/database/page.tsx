@@ -107,7 +107,6 @@ export default function DatabaseDebugPage() {
         <div className="sectionHeader">
           <div>
             <h2>Tables</h2>
-            <p className="muted compact">Navigate the core database tables used by documents, jobs, extractions, corrections, and audit logs.</p>
           </div>
           <button className="secondaryButton" onClick={loadRows} disabled={loading}>{loading ? 'Refreshing…' : 'Refresh now'}</button>
         </div>

@@ -25,7 +25,6 @@ export function DocumentPreview({ doc, activeExtraction, activeSourceRef }: Prop
       <div className="sectionHeader">
         <div>
           <h2>Document preview</h2>
-          <p className="muted compact">{parserLabel(doc.parser_type)} • preview is based on the immutable uploaded content stored in PostgreSQL.</p>
         </div>
         {activeExtraction && <span className={`confidencePill ${activeTier.className}`}>{activeTier.label} • {confidenceLabel(activeExtraction.confidence_score || 0)}</span>}
       </div>
@@ -40,10 +39,6 @@ export function DocumentPreview({ doc, activeExtraction, activeSourceRef }: Prop
           {activeExtraction.source_row_index !== null && activeExtraction.source_row_index !== undefined && <small>CSV row {activeExtraction.source_row_index}{activeExtraction.source_column_name ? ` • ${activeExtraction.source_column_name}` : ''}</small>}
           {canAttemptHighlight && !highlightResult.matched && doc.parser_type !== 'csv' && <small>Source is recorded, but the exact preview location could not be matched. This can happen when AI snippets are paraphrased or PDF text spacing changes.</small>}
         </div>
-      )}
-
-      {doc.parser_type === 'pdf_text' && (
-        <p className="emptyState">PDF original bytes are stored and downloadable. This preview shows selectable text extracted from the original PDF for source navigation/highlighting.</p>
       )}
 
       {doc.parser_type === 'csv' && csvPreviewRows.length > 0 ? (

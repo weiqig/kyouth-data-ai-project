@@ -136,7 +136,7 @@ export default function DocumentPage() {
   }
 
   async function rejectDocument() {
-    if (!documentId || !doc || !['pending', 'needs_review'].includes(doc.status)) return;
+    if (!documentId || !doc || !['pending', 'needs_review'].includes(effectiveStatus)) return;
     const selectedReason = REJECTION_REASONS.find((item) => item.code === rejectionReasonCode)?.label || 'Other';
     const confirmed = window.confirm(`Reject this document?\n\nReason: ${selectedReason}${rejectionNote.trim() ? `\nNote: ${rejectionNote.trim()}` : ''}`);
     if (!confirmed) return;
@@ -213,8 +213,10 @@ export default function DocumentPage() {
 
   if (!doc) return <main><p className="emptyState">Loading document from PostgreSQL...</p></main>;
 
-  const isRejected = doc.status === 'rejected';
-  const canReject = doc.status === 'pending' || doc.status === 'needs_review';
+  const allFieldsResolved = doc.extractions.length > 0 && doc.extractions.every((x) => x.accepted && !x.needs_review);
+  const effectiveStatus = doc.status === 'needs_review' && allFieldsResolved ? 'approved' : doc.status;
+  const isRejected = effectiveStatus === 'rejected';
+  const canReject = effectiveStatus === 'pending' || effectiveStatus === 'needs_review';
   const modeLabel = doc.extraction_mode === 'discovery'
     ? 'Free Extraction — no template'
     : doc.document_type_label
@@ -231,7 +233,7 @@ export default function DocumentPage() {
           <h1 className="documentTitle">{doc.filename || `Raw text document #${doc.id}`}</h1>
         </div>
         <div className="detailStatus">
-          <span className={`badge status-${doc.status}`}>{statusLabel(doc.status)}</span>
+          <span className={`badge status-${effectiveStatus}`}>{statusLabel(effectiveStatus)}</span>
           <a className="secondaryLinkButton" href={`${API}/documents/${doc.id}/download?actor=demo_user`}>Download original</a>
           {canReject && (
             <div className="rejectControls">
@@ -253,7 +255,6 @@ export default function DocumentPage() {
         <div>
           <p className="eyebrow">Review workspace</p>
           <h2>{acceptedCount} / {doc.extractions.length} fields accepted</h2>
-          <p className="muted compact">Click an extracted field to highlight its source in the original document preview.</p>
           <p className="muted compact">
             Mode: <strong>{modeLabel}</strong>
             {doc.document_type_label && ` • Required fields completed: ${completedRequiredTemplateFields} / ${requiredTemplateFields.length}`}
@@ -293,53 +294,57 @@ export default function DocumentPage() {
         </div>
       </section>
 
-      {aiReview && (
-        <section className="card aiReviewCard">
-          <div className="sectionHeader">
-            <div>
-              <p className="eyebrow">AI Review Assistant</p>
-              <h2>Reviewer briefing</h2>
-            </div>
-            <span className="badge">{aiReview.provider} / {aiReview.model}</span>
+      <section className="card aiReviewCard">
+        <div className="sectionHeader">
+          <div>
+            <p className="eyebrow">AI Review Assistant</p>
+            <h2>Reviewer briefing</h2>
           </div>
-          <div className="aiReviewGrid">
-            <div>
-              <span>Document quality</span>
-              <strong>{aiReview.document_quality.replaceAll('_', ' ')}</strong>
+          <span className="badge">{aiReview ? `${aiReview.provider} / ${aiReview.model}` : 'Waiting'}</span>
+        </div>
+        {aiReview ? (
+          <>
+            <div className="aiReviewGrid">
+              <div>
+                <span>Document quality</span>
+                <strong>{aiReview.document_quality.replaceAll('_', ' ')}</strong>
+              </div>
+              <div>
+                <span>Overall confidence</span>
+                <strong>{confidenceLabel(aiReview.overall_confidence)}</strong>
+              </div>
             </div>
-            <div>
-              <span>Overall confidence</span>
-              <strong>{confidenceLabel(aiReview.overall_confidence)}</strong>
-            </div>
+            <p>{aiReview.summary}</p>
+            {aiReviewIssues.length > 0 && (
+              <div className="evidenceBox">
+                <strong>Potential issues</strong>
+                <ul>{aiReviewIssues.map((issue, index) => <li key={index}>{issue}</li>)}</ul>
+              </div>
+            )}
+            {aiReviewChecks.length > 0 && (
+              <div className="evidenceBox">
+                <strong>Consistency checks</strong>
+                <ul>{aiReviewChecks.map((check, index) => <li key={index}>{check}</li>)}</ul>
+              </div>
+            )}
+            <p className="muted compact"><strong>Recommendation:</strong> {aiReview.review_recommendation}</p>
+          </>
+        ) : (
+          <div className="emptyState">
+            {doc.status === 'pending' || doc.status === 'processing'
+              ? 'Waiting for document processing to finish before generating the reviewer briefing.'
+              : doc.status === 'error'
+                ? 'Unable to generate a reviewer briefing because processing failed.'
+                : 'Reviewer briefing has not been generated yet. Refresh after processing completes.'}
           </div>
-          <p>{aiReview.summary}</p>
-          {aiReviewIssues.length > 0 && (
-            <div className="evidenceBox">
-              <strong>Potential issues</strong>
-              <ul>{aiReviewIssues.map((issue, index) => <li key={index}>{issue}</li>)}</ul>
-            </div>
-          )}
-          {aiReviewChecks.length > 0 && (
-            <div className="evidenceBox">
-              <strong>Consistency checks</strong>
-              <ul>{aiReviewChecks.map((check, index) => <li key={index}>{check}</li>)}</ul>
-            </div>
-          )}
-          <p className="muted compact"><strong>Recommendation:</strong> {aiReview.review_recommendation}</p>
-        </section>
-      )}
+        )}
+      </section>
 
       <div className="reviewWorkspaceGrid">
         <DocumentPreview doc={doc} activeExtraction={activeExtraction} activeSourceRef={activeSourceRef} />
 
         <section className="card">
           <h2>Extracted fields</h2>
-          {doc.document_type_label && <p className="muted compact">Template fields are listed in the configured template order. Suggested and manually added fields appear after official schema fields.</p>}
-          {!doc.document_type_label && <p className="muted compact">Discovery fields follow the extracted/source order where available.</p>}
-          {isRejected && <p className="emptyState">View-only mode: rejected documents cannot be edited, accepted, corrected, or extended with missing fields.</p>}
-          {!isRejected && (doc.parser_type === 'json' || doc.parser_type === 'csv') && (
-            <p className="emptyState">Structured JSON/CSV fields are copied directly from the source and auto-accepted by default. Use corrections when a value must be changed, or add a missing field below.</p>
-          )}
           {doc.extractions.length === 0 && <p className="emptyState">Waiting for the Celery worker to process the PostgreSQL job.</p>}
           {orderedExtractions.map((x) => {
             const tier = confidenceTier(x.confidence_score);
@@ -372,7 +377,6 @@ export default function DocumentPage() {
                   onChange={(e) => setFieldNameEdits({ ...fieldNameEdits, [x.id]: e.target.value })}
                   readOnly={isRejected || !canEditFieldName(x)}
                 />
-                {!canEditFieldName(x) && <p className="muted compact">Template field names are locked to keep approved records queryable by the standardized schema. Edit the value instead.</p>}
 
                 <label>Original prototype/AI value</label>
                 <input value={x.extracted_value} readOnly />
@@ -447,7 +451,6 @@ export default function DocumentPage() {
 
           {!isRejected && <div className="addFieldBox">
             <h3>Add missing field</h3>
-            <p className="muted compact">Use this when the original document contains an important value that was not included in the extracted fields. Manually added fields are accepted immediately and recorded in the audit trail.</p>
             <label>Field name</label>
             <input value={newFieldName} onChange={(e) => setNewFieldName(e.target.value)} placeholder="e.g. invoice_number or records[0].customField" />
             <label>Value</label>

@@ -28,7 +28,7 @@ export function DocumentsTable({ docs, query, statusFilter, setQuery, setStatusF
       <div className="toolbar">
         <input placeholder="Search filename, parser, content, or raw text..." value={query} onChange={(e) => setQuery(e.target.value)} />
         <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-          <option value="all">All statuses</option>
+          <option value="all">All</option>
           <option value="pending">Pending</option>
           <option value="needs_review">Needs review</option>
           <option value="approved">Approved</option>

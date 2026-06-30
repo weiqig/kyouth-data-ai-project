@@ -17,7 +17,6 @@ export function AuditTimeline({ logs }: { logs: AuditLog[] }) {
   return (
     <section className="card">
       <h2>Audit trail</h2>
-      <p className="muted compact">Latest actions are shown first.</p>
       <div className="auditList">
         {logs.map((log) => {
           const auditTime = formatAuditTime(log.created_at);
