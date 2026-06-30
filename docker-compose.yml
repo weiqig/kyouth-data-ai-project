@@ -4,14 +4,13 @@ services:
     environment:
       API_INTERNAL_URL: http://api:8000
     ports:
-      - "3000:3000"
+      - 3000:3000
     volumes:
       - ./frontend:/app
       - frontend_node_modules:/app/node_modules
     depends_on:
       api:
         condition: service_healthy
-
   api:
     build: ./backend
     command: uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
@@ -19,7 +18,7 @@ services:
     environment:
       UV_PROJECT_ENVIRONMENT: /opt/venv
     ports:
-      - "8000:8000"
+      - 8000:8000
     volumes:
       - ./backend:/app
       - backend_uv_cache:/root/.cache/uv
@@ -29,13 +28,17 @@ services:
       redis:
         condition: service_started
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=2).read()"]
+      test:
+        - CMD
+        - python
+        - -c
+        - import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health',
+        timeout=2).read()
       interval: 5s
       timeout: 3s
       retries: 30
       start_period: 20s
     restart: unless-stopped
-
   worker:
     build: ./backend
     command: uv run celery -A app.worker.celery_app worker --loglevel=info
@@ -43,15 +46,14 @@ services:
     environment:
       UV_PROJECT_ENVIRONMENT: /opt/venv
     volumes:
-      - ./backend:/app
-      - backend_uv_cache:/root/.cache/uv
+    - ./backend:/app
+    - backend_uv_cache:/root/.cache/uv
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_started
     restart: unless-stopped
-
   beat:
     build: ./backend
     command: uv run celery -A app.worker.celery_app beat --loglevel=info
@@ -66,7 +68,7 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
-
+    restart: unless-stopped
   postgres:
     image: postgres:16
     environment:
@@ -74,22 +76,22 @@ services:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
     ports:
-      - "5432:5432"
+      - 5432:5432
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U user -d docs"]
+      test:
+        - CMD-SHELL
+        - pg_isready -U user -d docs
       interval: 5s
       timeout: 5s
       retries: 10
     restart: unless-stopped
-
   redis:
     image: redis:7-alpine
     ports:
-      - "6379:6379"
+      - 6379:6379
     restart: unless-stopped
-
 volumes:
   postgres_data:
   frontend_node_modules:
