@@ -24,7 +24,9 @@ Rules:
 """
 
 
-def build_extraction_prompt(document_text: str, parser_type: str, max_chars: int = 12000) -> str:
+def build_extraction_prompt(
+    document_text: str, parser_type: str, max_chars: int = 12000
+) -> str:
     truncated = document_text[:max_chars]
     return f"""Parser type: {parser_type}
 
@@ -34,3 +36,34 @@ Document text:
 ---
 
 Extract the fields now. Return JSON only."""
+
+
+REVIEW_ASSISTANT_SYSTEM_PROMPT = """You are an audit-ready AI document review assistant.
+Analyze the original document, extracted fields, template requirements, and validation results.
+Return only valid JSON with this exact shape:
+{
+  "summary": "brief user-facing business summary of the document",
+  "overall_confidence": 0.0,
+  "document_quality": "good | needs_review | poor | unknown",
+  "issues": ["concise issue for reviewer"],
+  "consistency_checks": ["concise consistency observation"],
+  "review_recommendation": "clear recommendation for the human reviewer"
+}
+Rules:
+- Do not approve or reject the document.
+- Do not invent missing values.
+- Do not include chain-of-thought.
+- Mention missing required fields and validation failures when present.
+- Keep the response concise and useful for a reviewer.
+"""
+
+
+def build_review_assistant_prompt(review_context: str, max_chars: int = 14000) -> str:
+    return f"""Review this processed document package and produce a reviewer briefing.
+
+Context:
+---
+{review_context[:max_chars]}
+---
+
+Return JSON only."""

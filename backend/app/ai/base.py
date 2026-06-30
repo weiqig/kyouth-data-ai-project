@@ -22,6 +22,19 @@ class AIExtractionResult:
     raw_response: str | None = None
 
 
+@dataclass(slots=True)
+class AIDocumentReviewResult:
+    provider: str
+    model: str
+    summary: str
+    overall_confidence: float
+    document_quality: str
+    review_recommendation: str
+    issues: list[str]
+    consistency_checks: list[str]
+    raw_response: str | None = None
+
+
 class AIProvider(ABC):
     """Provider-agnostic extraction interface.
 
@@ -37,8 +50,61 @@ class AIProvider(ABC):
         self.timeout_seconds = timeout_seconds
 
     @abstractmethod
-    def extract_fields(self, *, document_text: str, parser_type: str) -> AIExtractionResult:
+    def extract_fields(
+        self, *, document_text: str, parser_type: str
+    ) -> AIExtractionResult:
         """Extract reviewable fields from unstructured text."""
+
+    @abstractmethod
+    def review_document(self, *, review_context: str) -> AIDocumentReviewResult:
+        """Produce a reviewer briefing from document text, fields, and validation results."""
+
+
+def normalize_ai_review(
+    raw: Any, *, provider: str, model: str, raw_response: str | None = None
+) -> AIDocumentReviewResult:
+    if not isinstance(raw, dict):
+        raw = {}
+    summary = str(raw.get("summary") or "No AI review summary was returned.").strip()[
+        :2000
+    ]
+    quality = (
+        str(raw.get("document_quality") or raw.get("quality") or "unknown")
+        .strip()
+        .lower()
+        .replace(" ", "_")[:80]
+    )
+    recommendation = str(
+        raw.get("review_recommendation")
+        or raw.get("recommendation")
+        or "Review the extracted fields and validation messages before approval."
+    ).strip()[:2000]
+    try:
+        confidence = float(raw.get("overall_confidence", raw.get("confidence", 0.0)))
+    except (TypeError, ValueError):
+        confidence = 0.0
+    if confidence > 1:
+        confidence = confidence / 100
+    confidence = max(0.0, min(1.0, confidence))
+
+    def as_str_list(value: Any) -> list[str]:
+        if isinstance(value, list):
+            return [str(item).strip()[:500] for item in value if str(item).strip()]
+        if isinstance(value, str) and value.strip():
+            return [value.strip()[:500]]
+        return []
+
+    return AIDocumentReviewResult(
+        provider=provider,
+        model=model,
+        summary=summary,
+        overall_confidence=round(confidence, 4),
+        document_quality=quality or "unknown",
+        review_recommendation=recommendation,
+        issues=as_str_list(raw.get("issues") or raw.get("potential_issues")),
+        consistency_checks=as_str_list(raw.get("consistency_checks")),
+        raw_response=raw_response,
+    )
 
 
 def normalize_ai_fields(raw_fields: Any) -> list[AIExtractedField]:
@@ -59,20 +125,30 @@ def normalize_ai_fields(raw_fields: Any) -> list[AIExtractedField]:
             continue
 
         try:
-            confidence = float(item.get("confidence", item.get("confidence_score", 0.7)))
+            confidence = float(
+                item.get("confidence", item.get("confidence_score", 0.7))
+            )
         except (TypeError, ValueError):
             confidence = 0.7
         if confidence > 1:
             confidence = confidence / 100
         confidence = max(0.0, min(1.0, confidence))
 
-        snippet = str(item.get("source_snippet") or item.get("snippet") or value).strip()
-        explanation = str(item.get("explanation") or item.get("reasoning") or "Extracted by configured AI provider.").strip()
-        fields.append(AIExtractedField(
-            field_name=field_name[:120],
-            value=value,
-            confidence=round(confidence, 4),
-            source_snippet=snippet[:1000],
-            explanation=explanation[:1000],
-        ))
+        snippet = str(
+            item.get("source_snippet") or item.get("snippet") or value
+        ).strip()
+        explanation = str(
+            item.get("explanation")
+            or item.get("reasoning")
+            or "Extracted by configured AI provider."
+        ).strip()
+        fields.append(
+            AIExtractedField(
+                field_name=field_name[:120],
+                value=value,
+                confidence=round(confidence, 4),
+                source_snippet=snippet[:1000],
+                explanation=explanation[:1000],
+            )
+        )
     return fields

@@ -1,0 +1,172 @@
+{
+  "key": "finance_bank_statement",
+  "name": "Finance: Bank Statement",
+  "industry": "finance",
+  "description": "Bank statement fields for account reconciliation and finance operations.",
+  "aliases": [
+    "bank statement",
+    "statement",
+    "account statement"
+  ],
+  "fields": [
+    {
+      "key": "account_number",
+      "label": "Account Number",
+      "data_type": "string",
+      "required": true,
+      "aliases": [
+        "account",
+        "acct no",
+        "account no"
+      ],
+      "validation": {
+        "pattern": "^[0-9 -]{6,20}$",
+        "min_length": 6
+      }
+    },
+    {
+      "key": "account_holder_name",
+      "label": "Account Holder Name",
+      "data_type": "string",
+      "required": true,
+      "aliases": [
+        "account holder",
+        "customer",
+        "name"
+      ],
+      "validation": {
+        "min_length": 1
+      }
+    },
+    {
+      "key": "statement_start_date",
+      "label": "Statement Start Date",
+      "data_type": "date",
+      "required": true,
+      "aliases": [
+        "period from",
+        "start date"
+      ],
+      "validation": {
+        "formats": [
+          "YYYY-MM-DD",
+          "DD/MM/YYYY"
+        ]
+      }
+    },
+    {
+      "key": "statement_end_date",
+      "label": "Statement End Date",
+      "data_type": "date",
+      "required": true,
+      "aliases": [
+        "period to",
+        "end date"
+      ],
+      "validation": {
+        "formats": [
+          "YYYY-MM-DD",
+          "DD/MM/YYYY"
+        ]
+      }
+    },
+    {
+      "key": "opening_balance",
+      "label": "Opening Balance",
+      "data_type": "currency",
+      "required": false,
+      "aliases": [
+        "beginning balance"
+      ],
+      "validation": {
+        "min": 0,
+        "currencies": [
+          "RM",
+          "MYR",
+          "USD",
+          "SGD"
+        ],
+        "require_currency_symbol": false
+      }
+    },
+    {
+      "key": "closing_balance",
+      "label": "Closing Balance",
+      "data_type": "currency",
+      "required": true,
+      "aliases": [
+        "ending balance",
+        "balance"
+      ],
+      "validation": {
+        "min": 0,
+        "currencies": [
+          "RM",
+          "MYR",
+          "USD",
+          "SGD"
+        ],
+        "require_currency_symbol": false
+      }
+    },
+    {
+      "key": "total_deposits",
+      "label": "Total Deposits",
+      "data_type": "currency",
+      "required": false,
+      "aliases": [
+        "credits",
+        "money in"
+      ],
+      "validation": {
+        "min": 0,
+        "currencies": [
+          "RM",
+          "MYR",
+          "USD",
+          "SGD"
+        ],
+        "require_currency_symbol": false
+      }
+    },
+    {
+      "key": "total_withdrawals",
+      "label": "Total Withdrawals",
+      "data_type": "currency",
+      "required": false,
+      "aliases": [
+        "debits",
+        "money out"
+      ],
+      "validation": {
+        "min": 0,
+        "currencies": [
+          "RM",
+          "MYR",
+          "USD",
+          "SGD"
+        ],
+        "require_currency_symbol": false
+      }
+    },
+    {
+      "key": "currency",
+      "label": "Currency",
+      "data_type": "currency_code",
+      "required": false,
+      "aliases": [
+        "currency code"
+      ],
+      "validation": {
+        "allowed": [
+          "MYR",
+          "RM",
+          "USD",
+          "SGD",
+          "EUR",
+          "GBP"
+        ]
+      }
+    }
+  ]
+}

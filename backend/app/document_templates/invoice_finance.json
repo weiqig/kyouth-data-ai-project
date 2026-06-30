@@ -1,0 +1,183 @@
+{
+  "key": "finance_invoice",
+  "name": "Finance: Invoice",
+  "industry": "finance",
+  "description": "Standard invoice fields commonly needed by finance/AP teams.",
+  "aliases": [
+    "invoice",
+    "tax invoice",
+    "bill"
+  ],
+  "fields": [
+    {
+      "key": "invoice_number",
+      "label": "Invoice Number",
+      "data_type": "string",
+      "required": true,
+      "aliases": [
+        "invoice no",
+        "invoice #",
+        "inv number",
+        "reference"
+      ],
+      "validation": {
+        "min_length": 1
+      }
+    },
+    {
+      "key": "supplier_name",
+      "label": "Supplier Name",
+      "data_type": "string",
+      "required": true,
+      "aliases": [
+        "vendor",
+        "seller",
+        "supplier"
+      ],
+      "validation": {
+        "min_length": 1
+      }
+    },
+    {
+      "key": "customer_name",
+      "label": "Customer Name",
+      "data_type": "string",
+      "required": false,
+      "aliases": [
+        "client",
+        "buyer",
+        "customer"
+      ],
+      "validation": {
+        "min_length": 1
+      }
+    },
+    {
+      "key": "invoice_date",
+      "label": "Invoice Date",
+      "data_type": "date",
+      "required": true,
+      "aliases": [
+        "date",
+        "billing date"
+      ],
+      "validation": {
+        "formats": [
+          "YYYY-MM-DD",
+          "DD/MM/YYYY"
+        ]
+      }
+    },
+    {
+      "key": "due_date",
+      "label": "Due Date",
+      "data_type": "date",
+      "required": false,
+      "aliases": [
+        "payment due",
+        "due"
+      ],
+      "validation": {
+        "formats": [
+          "YYYY-MM-DD",
+          "DD/MM/YYYY"
+        ]
+      }
+    },
+    {
+      "key": "subtotal_amount",
+      "label": "Subtotal Amount",
+      "data_type": "currency",
+      "required": false,
+      "aliases": [
+        "subtotal"
+      ],
+      "validation": {
+        "min": 0,
+        "currencies": [
+          "RM",
+          "MYR",
+          "USD",
+          "SGD"
+        ],
+        "require_currency_symbol": false
+      }
+    },
+    {
+      "key": "tax_amount",
+      "label": "Tax Amount",
+      "data_type": "currency",
+      "required": false,
+      "aliases": [
+        "tax",
+        "sst",
+        "gst",
+        "vat"
+      ],
+      "validation": {
+        "min": 0,
+        "currencies": [
+          "RM",
+          "MYR",
+          "USD",
+          "SGD"
+        ],
+        "require_currency_symbol": false
+      }
+    },
+    {
+      "key": "total_amount",
+      "label": "Total Amount",
+      "data_type": "currency",
+      "required": true,
+      "aliases": [
+        "total",
+        "amount",
+        "amount due",
+        "invoice amount"
+      ],
+      "validation": {
+        "min": 0,
+        "currencies": [
+          "RM",
+          "MYR",
+          "USD",
+          "SGD"
+        ],
+        "require_currency_symbol": false
+      }
+    },
+    {
+      "key": "currency",
+      "label": "Currency",
+      "data_type": "currency_code",
+      "required": false,
+      "aliases": [
+        "currency code"
+      ],
+      "validation": {
+        "allowed": [
+          "MYR",
+          "RM",
+          "USD",
+          "SGD",
+          "EUR",
+          "GBP"
+        ]
+      }
+    },
+    {
+      "key": "payment_reference",
+      "label": "Payment Reference",
+      "data_type": "string",
+      "required": false,
+      "aliases": [
+        "reference number",
+        "payment ref"
+      ],
+      "validation": {
+        "min_length": 1
+      }
+    }
+  ]
+}

@@ -1,0 +1,145 @@
+{
+  "key": "construction_purchase_order",
+  "name": "Construction: Purchase Order",
+  "industry": "construction",
+  "description": "Procurement fields for construction materials, suppliers, and job-site purchasing.",
+  "aliases": [
+    "purchase order",
+    "po",
+    "material order"
+  ],
+  "fields": [
+    {
+      "key": "po_number",
+      "label": "PO Number",
+      "data_type": "string",
+      "required": true,
+      "aliases": [
+        "purchase order number",
+        "po #",
+        "order number"
+      ],
+      "validation": {
+        "min_length": 1
+      }
+    },
+    {
+      "key": "project_name",
+      "label": "Project Name",
+      "data_type": "string",
+      "required": true,
+      "aliases": [
+        "project",
+        "job name"
+      ],
+      "validation": {
+        "min_length": 1
+      }
+    },
+    {
+      "key": "site_location",
+      "label": "Site Location",
+      "data_type": "string",
+      "required": true,
+      "aliases": [
+        "site",
+        "job site",
+        "location"
+      ],
+      "validation": {
+        "min_length": 1
+      }
+    },
+    {
+      "key": "supplier_name",
+      "label": "Supplier Name",
+      "data_type": "string",
+      "required": true,
+      "aliases": [
+        "vendor",
+        "supplier"
+      ],
+      "validation": {
+        "min_length": 1
+      }
+    },
+    {
+      "key": "requested_by",
+      "label": "Requested By",
+      "data_type": "string",
+      "required": false,
+      "aliases": [
+        "requester",
+        "ordered by"
+      ],
+      "validation": {
+        "min_length": 1
+      }
+    },
+    {
+      "key": "order_date",
+      "label": "Order Date",
+      "data_type": "date",
+      "required": true,
+      "aliases": [
+        "date"
+      ],
+      "validation": {
+        "formats": [
+          "YYYY-MM-DD",
+          "DD/MM/YYYY"
+        ]
+      }
+    },
+    {
+      "key": "delivery_date",
+      "label": "Delivery Date",
+      "data_type": "date",
+      "required": false,
+      "aliases": [
+        "required by",
+        "delivery"
+      ],
+      "validation": {
+        "formats": [
+          "YYYY-MM-DD",
+          "DD/MM/YYYY"
+        ]
+      }
+    },
+    {
+      "key": "total_amount",
+      "label": "Total Amount",
+      "data_type": "currency",
+      "required": true,
+      "aliases": [
+        "total",
+        "amount",
+        "order total"
+      ],
+      "validation": {
+        "min": 0,
+        "currencies": [
+          "RM",
+          "MYR",
+          "USD",
+          "SGD"
+        ],
+        "require_currency_symbol": false
+      }
+    },
+    {
+      "key": "cost_code",
+      "label": "Cost Code",
+      "data_type": "string",
+      "required": false,
+      "aliases": [
+        "budget code",
+        "cost center"
+      ],
+      "validation": {
+        "min_length": 1
+      }
+    }
+  ]
+}

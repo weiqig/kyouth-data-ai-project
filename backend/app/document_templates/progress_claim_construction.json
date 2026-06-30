@@ -1,0 +1,166 @@
+{
+  "key": "construction_progress_claim",
+  "name": "Construction: Progress Claim",
+  "industry": "construction",
+  "description": "Progress claim/payment certificate fields for construction contract administration.",
+  "aliases": [
+    "progress claim",
+    "payment claim",
+    "payment certificate"
+  ],
+  "fields": [
+    {
+      "key": "claim_number",
+      "label": "Claim Number",
+      "data_type": "string",
+      "required": true,
+      "aliases": [
+        "claim no",
+        "payment certificate no"
+      ],
+      "validation": {
+        "min_length": 1
+      }
+    },
+    {
+      "key": "contract_number",
+      "label": "Contract Number",
+      "data_type": "string",
+      "required": true,
+      "aliases": [
+        "contract no",
+        "agreement number"
+      ],
+      "validation": {
+        "min_length": 1
+      }
+    },
+    {
+      "key": "project_name",
+      "label": "Project Name",
+      "data_type": "string",
+      "required": true,
+      "aliases": [
+        "project"
+      ],
+      "validation": {
+        "min_length": 1
+      }
+    },
+    {
+      "key": "contractor_name",
+      "label": "Contractor Name",
+      "data_type": "string",
+      "required": true,
+      "aliases": [
+        "contractor",
+        "supplier"
+      ],
+      "validation": {
+        "min_length": 1
+      }
+    },
+    {
+      "key": "claim_period_start",
+      "label": "Claim Period Start",
+      "data_type": "date",
+      "required": false,
+      "aliases": [
+        "period from"
+      ],
+      "validation": {
+        "formats": [
+          "YYYY-MM-DD",
+          "DD/MM/YYYY"
+        ]
+      }
+    },
+    {
+      "key": "claim_period_end",
+      "label": "Claim Period End",
+      "data_type": "date",
+      "required": true,
+      "aliases": [
+        "period to"
+      ],
+      "validation": {
+        "formats": [
+          "YYYY-MM-DD",
+          "DD/MM/YYYY"
+        ]
+      }
+    },
+    {
+      "key": "work_completed_percentage",
+      "label": "Work Completed %",
+      "data_type": "percentage",
+      "required": false,
+      "aliases": [
+        "completion",
+        "progress percentage"
+      ],
+      "validation": {
+        "min": 0,
+        "max": 100
+      }
+    },
+    {
+      "key": "claim_amount",
+      "label": "Claim Amount",
+      "data_type": "currency",
+      "required": true,
+      "aliases": [
+        "amount claimed",
+        "payment amount"
+      ],
+      "validation": {
+        "min": 0,
+        "currencies": [
+          "RM",
+          "MYR",
+          "USD",
+          "SGD"
+        ],
+        "require_currency_symbol": false
+      }
+    },
+    {
+      "key": "retention_amount",
+      "label": "Retention Amount",
+      "data_type": "currency",
+      "required": false,
+      "aliases": [
+        "retention"
+      ],
+      "validation": {
+        "min": 0,
+        "currencies": [
+          "RM",
+          "MYR",
+          "USD",
+          "SGD"
+        ],
+        "require_currency_symbol": false
+      }
+    },
+    {
+      "key": "approved_amount",
+      "label": "Approved Amount",
+      "data_type": "currency",
+      "required": false,
+      "aliases": [
+        "certified amount"
+      ],
+      "validation": {
+        "min": 0,
+        "currencies": [
+          "RM",
+          "MYR",
+          "USD",
+          "SGD"
+        ],
+        "require_currency_symbol": false
+      }
+    }
+  ]
+}
