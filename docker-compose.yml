@@ -34,6 +34,7 @@ services:
       timeout: 3s
       retries: 30
       start_period: 20s
+    restart: unless-stopped
 
   worker:
     build: ./backend
@@ -49,6 +50,7 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
+    restart: unless-stopped
 
   beat:
     build: ./backend
@@ -80,11 +82,13 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+    restart: unless-stopped
 
   redis:
     image: redis:7-alpine
     ports:
       - "6379:6379"
+    restart: unless-stopped
 
 volumes:
   postgres_data:
