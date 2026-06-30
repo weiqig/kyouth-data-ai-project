@@ -2,18 +2,7 @@ from __future__ import annotations
 
 from enum import Enum
 from difflib import SequenceMatcher
-from sqlalchemy import (
-    Boolean,
-    DateTime,
-    ForeignKey,
-    Integer,
-    String,
-    Text,
-    Float,
-    LargeBinary,
-    func,
-    UniqueConstraint,
-)
+from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text, Float, LargeBinary, func, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .db import Base
 
@@ -39,9 +28,7 @@ class DocumentTemplate(Base):
     """Configurable document type template with standardized field definitions."""
 
     __tablename__ = "document_templates"
-    __table_args__ = (
-        UniqueConstraint("template_key", name="uq_document_templates_template_key"),
-    )
+    __table_args__ = (UniqueConstraint("template_key", name="uq_document_templates_template_key"),)
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     template_key: Mapped[str] = mapped_column(String(120), nullable=False, index=True)
@@ -50,25 +37,17 @@ class DocumentTemplate(Base):
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at = mapped_column(DateTime(timezone=True), server_default=func.now())
 
-    fields: Mapped[list["FieldDefinition"]] = relationship(
-        back_populates="template", cascade="all, delete-orphan"
-    )
+    fields: Mapped[list["FieldDefinition"]] = relationship(back_populates="template", cascade="all, delete-orphan")
 
 
 class FieldDefinition(Base):
     """Standardized field expected for a document template."""
 
     __tablename__ = "field_definitions"
-    __table_args__ = (
-        UniqueConstraint(
-            "template_id", "field_key", name="uq_field_definitions_template_field_key"
-        ),
-    )
+    __table_args__ = (UniqueConstraint("template_id", "field_key", name="uq_field_definitions_template_field_key"),)
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
-    template_id: Mapped[int] = mapped_column(
-        ForeignKey("document_templates.id", ondelete="CASCADE"), index=True
-    )
+    template_id: Mapped[int] = mapped_column(ForeignKey("document_templates.id", ondelete="CASCADE"), index=True)
     field_key: Mapped[str] = mapped_column(String(120), nullable=False, index=True)
     display_label: Mapped[str] = mapped_column(String(180), nullable=False)
     data_type: Mapped[str] = mapped_column(String(80), default="string")
@@ -86,30 +65,21 @@ class Document(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     filename: Mapped[str | None] = mapped_column(String(255), nullable=True)
     content_type: Mapped[str | None] = mapped_column(String(120), nullable=True)
-    document_type_key: Mapped[str | None] = mapped_column(
-        String(120), nullable=True, index=True
-    )
+    document_type_key: Mapped[str | None] = mapped_column(String(120), nullable=True, index=True)
     document_type_label: Mapped[str | None] = mapped_column(String(180), nullable=True)
-    extraction_mode: Mapped[str] = mapped_column(
-        String(50), default="auto_detect", index=True
-    )
+    extraction_mode: Mapped[str] = mapped_column(String(50), default="auto_detect", index=True)
     original_file_data: Mapped[bytes | None] = mapped_column(LargeBinary, nullable=True)
     original_file_size: Mapped[int | None] = mapped_column(Integer, nullable=True)
     parser_type: Mapped[str] = mapped_column(String(80), default="raw_text")
     raw_text: Mapped[str] = mapped_column(Text, nullable=False)
-    content_hash: Mapped[str | None] = mapped_column(
-        String(64), nullable=True, index=True
-    )
-    status: Mapped[str] = mapped_column(
-        String(50), default=DocumentStatus.PENDING.value, index=True
-    )
+    content_hash: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
+    status: Mapped[str] = mapped_column(String(50), default=DocumentStatus.PENDING.value, index=True)
     error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
     deferred_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
     next_retry_at = mapped_column(DateTime(timezone=True), nullable=True)
     created_at = mapped_column(DateTime(timezone=True), server_default=func.now())
-    updated_at = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
-    )
+    updated_at = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
 
     @property
     def original_preview_text(self) -> str:
@@ -121,26 +91,15 @@ class Document(Base):
         rendering is outside this MVP's text-based review workspace.
         """
         if self.original_file_data:
-            content_type = (self.content_type or "").split(";")[0].lower()
-            if (
-                self.parser_type
-                in {"plain_text", "raw_text", "markdown", "json", "csv"}
-                or content_type.startswith("text/")
-                or content_type in {"application/json", "text/csv", "application/csv"}
-            ):
-                return self.original_file_data.decode("utf-8-sig", errors="replace")
+            content_type = (self.content_type or '').split(';')[0].lower()
+            if self.parser_type in {'plain_text', 'raw_text', 'markdown', 'json', 'csv'} or content_type.startswith('text/') or content_type in {'application/json', 'text/csv', 'application/csv'}:
+                return self.original_file_data.decode('utf-8-sig', errors='replace')
         return self.raw_text
 
-    extractions: Mapped[list["Extraction"]] = relationship(
-        back_populates="document", cascade="all, delete-orphan"
-    )
-    jobs: Mapped[list["ProcessingJob"]] = relationship(
-        back_populates="document", cascade="all, delete-orphan"
-    )
+    extractions: Mapped[list["Extraction"]] = relationship(back_populates="document", cascade="all, delete-orphan")
+    jobs: Mapped[list["ProcessingJob"]] = relationship(back_populates="document", cascade="all, delete-orphan")
     ai_reviews: Mapped[list["DocumentAIReview"]] = relationship(
-        back_populates="document",
-        cascade="all, delete-orphan",
-        order_by="DocumentAIReview.created_at",
+        back_populates="document", cascade="all, delete-orphan", order_by="DocumentAIReview.created_at"
     )
 
 
@@ -150,12 +109,8 @@ class ProcessingJob(Base):
     __tablename__ = "processing_jobs"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
-    document_id: Mapped[int] = mapped_column(
-        ForeignKey("documents.id", ondelete="CASCADE"), index=True
-    )
-    status: Mapped[str] = mapped_column(
-        String(50), default=JobStatus.QUEUED.value, index=True
-    )
+    document_id: Mapped[int] = mapped_column(ForeignKey("documents.id", ondelete="CASCADE"), index=True)
+    status: Mapped[str] = mapped_column(String(50), default=JobStatus.QUEUED.value, index=True)
     attempts: Mapped[int] = mapped_column(Integer, default=0)
     error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
     deferred_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
@@ -171,20 +126,10 @@ class Extraction(Base):
     __tablename__ = "extractions"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
-    document_id: Mapped[int] = mapped_column(
-        ForeignKey("documents.id", ondelete="CASCADE"), index=True
-    )
-    field_definition_id: Mapped[int | None] = mapped_column(
-        ForeignKey("field_definitions.id", ondelete="SET NULL"),
-        nullable=True,
-        index=True,
-    )
-    template_key: Mapped[str | None] = mapped_column(
-        String(120), nullable=True, index=True
-    )
-    standard_field_key: Mapped[str | None] = mapped_column(
-        String(120), nullable=True, index=True
-    )
+    document_id: Mapped[int] = mapped_column(ForeignKey("documents.id", ondelete="CASCADE"), index=True)
+    field_definition_id: Mapped[int | None] = mapped_column(ForeignKey("field_definitions.id", ondelete="SET NULL"), nullable=True, index=True)
+    template_key: Mapped[str | None] = mapped_column(String(120), nullable=True, index=True)
+    standard_field_key: Mapped[str | None] = mapped_column(String(120), nullable=True, index=True)
     data_type: Mapped[str | None] = mapped_column(String(80), nullable=True)
     required: Mapped[bool] = mapped_column(Boolean, default=False)
     validation_status: Mapped[str | None] = mapped_column(String(50), nullable=True)
@@ -212,18 +157,12 @@ class Extraction(Base):
 
     document: Mapped[Document] = relationship(back_populates="extractions")
     corrections: Mapped[list["Correction"]] = relationship(
-        back_populates="extraction",
-        cascade="all, delete-orphan",
-        order_by="Correction.corrected_at",
+        back_populates="extraction", cascade="all, delete-orphan", order_by="Correction.corrected_at"
     )
 
     @property
     def display_value(self) -> str:
-        return (
-            self.corrections[-1].corrected_value
-            if self.corrections
-            else self.extracted_value
-        )
+        return self.corrections[-1].corrected_value if self.corrections else self.extracted_value
 
     @staticmethod
     def _normalized_for_review(value: str) -> str:
@@ -260,9 +199,7 @@ class Extraction(Base):
         if not normalized_original or not normalized_reviewed:
             return 0.0
 
-        return round(
-            SequenceMatcher(None, normalized_original, normalized_reviewed).ratio(), 4
-        )
+        return round(SequenceMatcher(None, normalized_original, normalized_reviewed).ratio(), 4)
 
     @property
     def review_status(self) -> str:
@@ -281,9 +218,7 @@ class Correction(Base):
     __tablename__ = "corrections"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
-    extraction_id: Mapped[int] = mapped_column(
-        ForeignKey("extractions.id", ondelete="CASCADE"), index=True
-    )
+    extraction_id: Mapped[int] = mapped_column(ForeignKey("extractions.id", ondelete="CASCADE"), index=True)
     old_value: Mapped[str] = mapped_column(Text, nullable=False)
     corrected_value: Mapped[str] = mapped_column(Text, nullable=False)
     corrected_by: Mapped[str] = mapped_column(String(120), default="demo_user")
@@ -296,9 +231,7 @@ class AuditLog(Base):
     __tablename__ = "audit_logs"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
-    document_id: Mapped[int | None] = mapped_column(
-        ForeignKey("documents.id", ondelete="SET NULL"), nullable=True, index=True
-    )
+    document_id: Mapped[int | None] = mapped_column(ForeignKey("documents.id", ondelete="SET NULL"), nullable=True, index=True)
     action: Mapped[str] = mapped_column(String(80), nullable=False)
     actor: Mapped[str] = mapped_column(String(120), default="system")
     details: Mapped[str] = mapped_column(Text, default="")
@@ -317,9 +250,7 @@ class DocumentAIReview(Base):
     __tablename__ = "document_ai_reviews"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
-    document_id: Mapped[int] = mapped_column(
-        ForeignKey("documents.id", ondelete="CASCADE"), index=True
-    )
+    document_id: Mapped[int] = mapped_column(ForeignKey("documents.id", ondelete="CASCADE"), index=True)
     provider: Mapped[str] = mapped_column(String(80), nullable=False)
     model: Mapped[str] = mapped_column(String(160), nullable=False)
     summary: Mapped[str] = mapped_column(Text, nullable=False)
@@ -342,9 +273,7 @@ class AIRequestCache(Base):
     """
 
     __tablename__ = "ai_request_cache"
-    __table_args__ = (
-        UniqueConstraint("cache_key", name="uq_ai_request_cache_cache_key"),
-    )
+    __table_args__ = (UniqueConstraint("cache_key", name="uq_ai_request_cache_cache_key"),)
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     cache_key: Mapped[str] = mapped_column(String(128), nullable=False, index=True)
@@ -355,9 +284,7 @@ class AIRequestCache(Base):
     fields_json: Mapped[str] = mapped_column(Text, nullable=False)
     raw_response: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at = mapped_column(DateTime(timezone=True), server_default=func.now())
-    last_used_at = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
-    )
+    last_used_at = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     use_count: Mapped[int] = mapped_column(Integer, default=0)
 
 
@@ -369,11 +296,7 @@ class AIRateLimitWindow(Base):
     """
 
     __tablename__ = "ai_rate_limit_windows"
-    __table_args__ = (
-        UniqueConstraint(
-            "provider", "model", "window_type", "window_start", name="uq_ai_rate_window"
-        ),
-    )
+    __table_args__ = (UniqueConstraint("provider", "model", "window_type", "window_start", name="uq_ai_rate_window"),)
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     provider: Mapped[str] = mapped_column(String(80), nullable=False, index=True)
@@ -383,6 +306,4 @@ class AIRateLimitWindow(Base):
     request_count: Mapped[int] = mapped_column(Integer, default=0)
     limit_count: Mapped[int] = mapped_column(Integer, default=0)
     created_at = mapped_column(DateTime(timezone=True), server_default=func.now())
-    updated_at = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
-    )
+    updated_at = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())

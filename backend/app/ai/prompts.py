@@ -24,9 +24,7 @@ Rules:
 """
 
 
-def build_extraction_prompt(
-    document_text: str, parser_type: str, max_chars: int = 12000
-) -> str:
+def build_extraction_prompt(document_text: str, parser_type: str, max_chars: int = 12000) -> str:
     truncated = document_text[:max_chars]
     return f"""Parser type: {parser_type}
 

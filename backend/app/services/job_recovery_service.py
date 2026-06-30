@@ -13,9 +13,7 @@ from ..models import AuditLog, Document, DocumentStatus, JobStatus, ProcessingJo
 DEFAULT_MAX_ATTEMPTS = int(os.getenv("JOB_MAX_ATTEMPTS", "3"))
 DEFAULT_STALE_MINUTES = int(os.getenv("STALE_JOB_MINUTES", "10"))
 DEFAULT_BATCH_SIZE = int(os.getenv("JOB_RECOVERY_BATCH_SIZE", "50"))
-DEFAULT_PENDING_REQUEUE_GRACE_SECONDS = int(
-    os.getenv("PENDING_JOB_REQUEUE_GRACE_SECONDS", "120")
-)
+DEFAULT_PENDING_REQUEUE_GRACE_SECONDS = int(os.getenv("PENDING_JOB_REQUEUE_GRACE_SECONDS", "120"))
 
 
 @dataclass(frozen=True)
@@ -24,25 +22,19 @@ class RecoveryPlan:
     count: int
 
 
-def _mark_recovery_skip_rejected(
-    db: Session, job: ProcessingJob, *, action: str
-) -> None:
+def _mark_recovery_skip_rejected(db: Session, job: ProcessingJob, *, action: str) -> None:
     job.status = JobStatus.FAILED.value
     job.error_message = "Recovery skipped: document is rejected."
     job.finished_at = utcnow()
-    db.add(
-        AuditLog(
-            document_id=job.document_id,
-            action=action,
-            actor="celery_recovery",
-            details=f"Job {job.id} was not requeued because the document is rejected.",
-        )
-    )
+    db.add(AuditLog(
+        document_id=job.document_id,
+        action=action,
+        actor="celery_recovery",
+        details=f"Job {job.id} was not requeued because the document is rejected.",
+    ))
 
 
-def _prepare_job_for_requeue(
-    db: Session, job: ProcessingJob, *, action: str, details: str
-) -> int | None:
+def _prepare_job_for_requeue(db: Session, job: ProcessingJob, *, action: str, details: str) -> int | None:
     doc = db.get(Document, job.document_id)
     if not doc:
         job.status = JobStatus.FAILED.value
@@ -50,9 +42,7 @@ def _prepare_job_for_requeue(
         job.finished_at = utcnow()
         return None
     if doc.status == DocumentStatus.REJECTED.value:
-        _mark_recovery_skip_rejected(
-            db, job, action=f"{action}_skipped_rejected_document"
-        )
+        _mark_recovery_skip_rejected(db, job, action=f"{action}_skipped_rejected_document")
         return None
 
     job.status = JobStatus.QUEUED.value
@@ -60,14 +50,12 @@ def _prepare_job_for_requeue(
     job.finished_at = None
     doc.status = DocumentStatus.PENDING.value
     doc.error_message = None
-    db.add(
-        AuditLog(
-            document_id=job.document_id,
-            action=action,
-            actor="celery_recovery",
-            details=details,
-        )
-    )
+    db.add(AuditLog(
+        document_id=job.document_id,
+        action=action,
+        actor="celery_recovery",
+        details=details,
+    ))
     return job.id
 
 
@@ -83,16 +71,8 @@ def collect_deferred_jobs_ready_for_retry(
         .where(ProcessingJob.status == JobStatus.QUEUED.value)
         .where(ProcessingJob.deferred_reason.is_not(None))
         .where(ProcessingJob.attempts < max_attempts)
-        .where(
-            or_(
-                ProcessingJob.next_retry_at.is_(None),
-                ProcessingJob.next_retry_at <= func.now(),
-            )
-        )
-        .order_by(
-            ProcessingJob.next_retry_at.asc().nullsfirst(),
-            ProcessingJob.created_at.asc(),
-        )
+        .where(or_(ProcessingJob.next_retry_at.is_(None), ProcessingJob.next_retry_at <= func.now()))
+        .order_by(ProcessingJob.next_retry_at.asc().nullsfirst(), ProcessingJob.created_at.asc())
         .limit(batch_size)
     ).all()
 
@@ -165,12 +145,7 @@ def collect_orphaned_pending_jobs(
         .where(ProcessingJob.deferred_reason.is_(None))
         .where(ProcessingJob.attempts < max_attempts)
         .where(ProcessingJob.created_at < cutoff)
-        .where(
-            or_(
-                ProcessingJob.next_retry_at.is_(None),
-                ProcessingJob.next_retry_at <= func.now(),
-            )
-        )
+        .where(or_(ProcessingJob.next_retry_at.is_(None), ProcessingJob.next_retry_at <= func.now()))
         .order_by(ProcessingJob.created_at.asc())
         .limit(batch_size)
     ).all()
@@ -200,15 +175,8 @@ def collect_retryable_failed_jobs(
         select(ProcessingJob)
         .where(ProcessingJob.status == JobStatus.FAILED.value)
         .where(ProcessingJob.attempts < max_attempts)
-        .where(
-            or_(
-                ProcessingJob.next_retry_at.is_(None),
-                ProcessingJob.next_retry_at <= func.now(),
-            )
-        )
-        .order_by(
-            ProcessingJob.finished_at.asc().nullsfirst(), ProcessingJob.created_at.asc()
-        )
+        .where(or_(ProcessingJob.next_retry_at.is_(None), ProcessingJob.next_retry_at <= func.now()))
+        .order_by(ProcessingJob.finished_at.asc().nullsfirst(), ProcessingJob.created_at.asc())
         .limit(batch_size)
     ).all()
 

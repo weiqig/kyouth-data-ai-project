@@ -21,15 +21,7 @@ def _env_int(name: str, default: int) -> int:
 
 
 class AIRateLimitExceeded(RuntimeError):
-    def __init__(
-        self,
-        *,
-        provider: str,
-        model: str,
-        window_type: str,
-        limit: int,
-        reset_at: datetime,
-    ) -> None:
+    def __init__(self, *, provider: str, model: str, window_type: str, limit: int, reset_at: datetime) -> None:
         self.provider = provider
         self.model = model
         self.window_type = window_type
@@ -50,29 +42,17 @@ def sha256_text(value: str) -> str:
     return hashlib.sha256((value or "").encode("utf-8")).hexdigest()
 
 
-def ai_cache_key(
-    *, content_hash: str, parser_type: str, provider: str, model: str
-) -> str:
+def ai_cache_key(*, content_hash: str, parser_type: str, provider: str, model: str) -> str:
     raw = f"{content_hash}:{parser_type}:{provider}:{model}"
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
 
 def cache_enabled() -> bool:
-    return os.getenv("AI_CACHE_ENABLED", "true").strip().lower() in {
-        "1",
-        "true",
-        "yes",
-        "on",
-    }
+    return os.getenv("AI_CACHE_ENABLED", "true").strip().lower() in {"1", "true", "yes", "on"}
 
 
 def rate_limits_enabled() -> bool:
-    return os.getenv("AI_RATE_LIMIT_ENABLED", "true").strip().lower() in {
-        "1",
-        "true",
-        "yes",
-        "on",
-    }
+    return os.getenv("AI_RATE_LIMIT_ENABLED", "true").strip().lower() in {"1", "true", "yes", "on"}
 
 
 def minute_limit() -> int:
@@ -103,15 +83,7 @@ def _window_reset(start: datetime, window_type: str) -> datetime:
     raise ValueError(f"Unknown rate-limit window type: {window_type}")
 
 
-def _get_or_create_window(
-    db: Session,
-    *,
-    provider: str,
-    model: str,
-    window_type: str,
-    limit: int,
-    now: datetime,
-) -> AIRateLimitWindow:
+def _get_or_create_window(db: Session, *, provider: str, model: str, window_type: str, limit: int, now: datetime) -> AIRateLimitWindow:
     start = _window_start(now, window_type)
     row = db.scalar(
         select(AIRateLimitWindow)
@@ -153,22 +125,9 @@ def reserve_ai_request_quota(db: Session, *, provider: str, model: str) -> None:
     for window_type, limit in windows:
         if limit <= 0:
             continue
-        row = _get_or_create_window(
-            db,
-            provider=provider,
-            model=model,
-            window_type=window_type,
-            limit=limit,
-            now=now,
-        )
+        row = _get_or_create_window(db, provider=provider, model=model, window_type=window_type, limit=limit, now=now)
         if row.request_count >= limit:
-            raise AIRateLimitExceeded(
-                provider=provider,
-                model=model,
-                window_type=window_type,
-                limit=limit,
-                reset_at=_window_reset(row.window_start, window_type),
-            )
+            raise AIRateLimitExceeded(provider=provider, model=model, window_type=window_type, limit=limit, reset_at=_window_reset(row.window_start, window_type))
         rows.append(row)
 
     for row in rows:
@@ -178,9 +137,7 @@ def reserve_ai_request_quota(db: Session, *, provider: str, model: str) -> None:
 def load_cached_ai_result(db: Session, *, cache_key: str) -> AIExtractionResult | None:
     if not cache_enabled():
         return None
-    cache = db.scalar(
-        select(AIRequestCache).where(AIRequestCache.cache_key == cache_key)
-    )
+    cache = db.scalar(select(AIRequestCache).where(AIRequestCache.cache_key == cache_key))
     if not cache:
         return None
     try:
@@ -190,12 +147,7 @@ def load_cached_ai_result(db: Session, *, cache_key: str) -> AIExtractionResult 
         return None
     cache.use_count += 1
     cache.last_used_at = utcnow()
-    return AIExtractionResult(
-        provider=cache.provider,
-        model=cache.model,
-        fields=fields,
-        raw_response=cache.raw_response,
-    )
+    return AIExtractionResult(provider=cache.provider, model=cache.model, fields=fields, raw_response=cache.raw_response)
 
 
 def save_ai_result_to_cache(
@@ -208,27 +160,21 @@ def save_ai_result_to_cache(
 ) -> None:
     if not cache_enabled():
         return
-    existing = db.scalar(
-        select(AIRequestCache).where(AIRequestCache.cache_key == cache_key)
-    )
-    fields_json = json.dumps(
-        [asdict(field) for field in result.fields], ensure_ascii=False
-    )
+    existing = db.scalar(select(AIRequestCache).where(AIRequestCache.cache_key == cache_key))
+    fields_json = json.dumps([asdict(field) for field in result.fields], ensure_ascii=False)
     if existing:
         existing.fields_json = fields_json
         existing.raw_response = result.raw_response
         existing.last_used_at = utcnow()
         existing.use_count += 1
         return
-    db.add(
-        AIRequestCache(
-            cache_key=cache_key,
-            content_hash=content_hash,
-            parser_type=parser_type,
-            provider=result.provider,
-            model=result.model,
-            fields_json=fields_json,
-            raw_response=result.raw_response,
-            use_count=1,
-        )
-    )
+    db.add(AIRequestCache(
+        cache_key=cache_key,
+        content_hash=content_hash,
+        parser_type=parser_type,
+        provider=result.provider,
+        model=result.model,
+        fields_json=fields_json,
+        raw_response=result.raw_response,
+        use_count=1,
+    ))

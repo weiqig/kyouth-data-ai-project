@@ -36,9 +36,7 @@ def sort_document_extractions(document: Document | None) -> Document | None:
 
     template = get_template_definition(document.document_type_key)
     if not template:
-        document.extractions = sorted(
-            document.extractions, key=lambda item: item.id or 0
-        )
+        document.extractions = sorted(document.extractions, key=lambda item: (item.id or 0))
         return document
 
     order_by_key = {field.key: field.order for field in template.fields}

@@ -16,9 +16,7 @@ def mark_extraction_accepted(extraction: Extraction, actor: str) -> None:
     extraction.accepted_at = utcnow()
 
 
-def auto_accept_exact_display_matches(
-    db: Session, document_id: int, actor: str = "system"
-) -> int:
+def auto_accept_exact_display_matches(db: Session, document_id: int, actor: str = "system") -> int:
     """Auto-accept fields whose display value exactly matches extraction value.
 
     Low-confidence fields still require review regardless of exact matching.
@@ -63,42 +61,24 @@ def auto_accept_exact_display_matches(
     return accepted_count
 
 
-def refresh_document_review_status(
-    db: Session, document_id: int, actor: str = "system"
-) -> str:
+def refresh_document_review_status(db: Session, document_id: int, actor: str = "system") -> str:
     """Approve only when every extraction is accepted and none need review."""
     document = db.get(Document, document_id)
     if not document:
         return "missing"
 
-    if document.status in {
-        DocumentStatus.ERROR.value,
-        DocumentStatus.PENDING.value,
-        DocumentStatus.REJECTED.value,
-    }:
+    if document.status in {DocumentStatus.ERROR.value, DocumentStatus.PENDING.value, DocumentStatus.REJECTED.value}:
         return document.status
 
     auto_accept_exact_display_matches(db, document_id, actor=actor)
 
-    total_fields = (
-        db.scalar(
-            select(func.count())
-            .select_from(Extraction)
-            .where(Extraction.document_id == document_id)
+    total_fields = db.scalar(select(func.count()).select_from(Extraction).where(Extraction.document_id == document_id)) or 0
+    blocking_fields = db.scalar(
+        select(func.count()).select_from(Extraction).where(
+            Extraction.document_id == document_id,
+            or_(Extraction.needs_review.is_(True), Extraction.accepted.is_(False)),
         )
-        or 0
-    )
-    blocking_fields = (
-        db.scalar(
-            select(func.count())
-            .select_from(Extraction)
-            .where(
-                Extraction.document_id == document_id,
-                or_(Extraction.needs_review.is_(True), Extraction.accepted.is_(False)),
-            )
-        )
-        or 0
-    )
+    ) or 0
 
     old_status = document.status
     document.status = (
@@ -113,14 +93,7 @@ def refresh_document_review_status(
             f"Approval requires all {total_fields} fields accepted and zero fields needing review; "
             f"{blocking_fields} blocking field(s) remain."
         )
-        db.add(
-            AuditLog(
-                document_id=document_id,
-                action="document_state_changed",
-                actor=actor,
-                details=transition_details,
-            )
-        )
+        db.add(AuditLog(document_id=document_id, action="document_state_changed", actor=actor, details=transition_details))
         if document.status == DocumentStatus.APPROVED.value:
             db.add(
                 AuditLog(

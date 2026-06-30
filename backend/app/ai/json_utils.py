@@ -26,7 +26,7 @@ def parse_json_object(text: str) -> dict[str, Any]:
     start = cleaned.find("{")
     end = cleaned.rfind("}")
     if start >= 0 and end > start:
-        parsed = json.loads(cleaned[start : end + 1])
+        parsed = json.loads(cleaned[start:end + 1])
         if isinstance(parsed, dict):
             return parsed
 

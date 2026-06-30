@@ -5,16 +5,7 @@ from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 
 from ..db import get_db
-from ..models import (
-    AIRequestCache,
-    AIRateLimitWindow,
-    AuditLog,
-    Correction,
-    Document,
-    DocumentAIReview,
-    Extraction,
-    ProcessingJob,
-)
+from ..models import AIRequestCache, AIRateLimitWindow, AuditLog, Correction, Document, DocumentAIReview, Extraction, ProcessingJob
 
 router = APIRouter(prefix="/debug", tags=["debug"])
 
@@ -66,9 +57,7 @@ def debug_tables():
 @router.get("/tables/{table_name}")
 def debug_table_rows(
     table_name: str,
-    q: str | None = Query(
-        default=None, description="Optional text search across text/varchar columns."
-    ),
+    q: str | None = Query(default=None, description="Optional text search across text/varchar columns."),
     limit: int = Query(default=100, ge=1, le=500),
     offset: int = Query(default=0, ge=0),
     db: Session = Depends(get_db),

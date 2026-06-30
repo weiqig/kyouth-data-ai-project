@@ -1,7 +1,6 @@
 import os
 from celery import Celery
 
-
 REDIS_URL = os.getenv("REDIS_URL", "redis://redis:6379/0")
 
 celery_app = Celery(
@@ -10,7 +9,6 @@ celery_app = Celery(
     backend=None,
     include=["app.tasks"],
 )
-
 celery_app.conf.update(
     task_ignore_result=True,
     result_backend=None,
