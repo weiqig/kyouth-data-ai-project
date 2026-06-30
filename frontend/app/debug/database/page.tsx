@@ -23,6 +23,7 @@ const friendlyTableName: Record<string, string> = {
   extractions: 'Extractions',
   corrections: 'Corrections',
   audit_logs: 'Audit Logs',
+  document_ai_reviews: 'AI Review Assistant',
 };
 
 function formatCell(value: unknown) {
@@ -82,8 +83,6 @@ export default function DatabaseDebugPage() {
 
   useEffect(() => {
     loadRows();
-    const interval = setInterval(loadRows, 5000);
-    return () => clearInterval(interval);
   }, [activeTable, debouncedQuery, limit]);
 
   const columns = useMemo(() => rows?.columns ?? tables.find((table) => table.name === activeTable)?.columns ?? [], [rows, tables, activeTable]);

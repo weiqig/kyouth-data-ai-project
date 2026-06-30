@@ -15,7 +15,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <nav>
             <a href="/">Upload</a>
             <a href="/records">Database Records</a>
-            <a href="/debug/database">Debug DB</a>
           </nav>
         </header>
         {children}

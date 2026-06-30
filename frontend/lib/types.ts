@@ -1,0 +1,97 @@
+export type ProcessingJob = { id: number; status: string; attempts: number };
+export type Correction = { id: number; old_value: string; corrected_value: string; corrected_by: string; corrected_at: string };
+export type Extraction = {
+  id: number;
+  field_definition_id?: number | null;
+  template_key?: string | null;
+  standard_field_key?: string | null;
+  data_type?: string | null;
+  required?: boolean;
+  validation_status?: string | null;
+  validation_message?: string | null;
+  validation_rule?: string | null;
+  field_name: string;
+  extracted_value: string;
+  display_value: string;
+  confidence_score: number;
+  review_confidence_score: number;
+  review_status: string;
+  source_snippet: string;
+  source_line_number?: number | null;
+  source_start_char?: number | null;
+  source_end_char?: number | null;
+  source_json_path?: string | null;
+  source_row_index?: number | null;
+  source_column_name?: string | null;
+  ai_reasoning: string;
+  needs_review: boolean;
+  accepted: boolean;
+  accepted_by?: string | null;
+  accepted_at?: string | null;
+  corrections: Correction[];
+};
+export type DocumentAIReview = {
+  id: number;
+  provider: string;
+  model: string;
+  summary: string;
+  overall_confidence: number;
+  document_quality: string;
+  review_recommendation: string;
+  issues_json: string;
+  consistency_checks_json: string;
+  created_at: string;
+};
+
+export type DocumentRecord = {
+  id: number;
+  filename: string | null;
+  content_type: string | null;
+  document_type_key?: string | null;
+  document_type_label?: string | null;
+  extraction_mode?: string;
+  original_file_size?: number | null;
+  original_preview_text?: string;
+  parser_type: string;
+  raw_text: string;
+  status: string;
+  error_message?: string | null;
+  created_at: string;
+  updated_at?: string | null;
+  extractions: Extraction[];
+  jobs: ProcessingJob[];
+  ai_reviews: DocumentAIReview[];
+};
+export type Capabilities = {
+  supported_extensions: string[];
+  supported_content_types: string[];
+  intentionally_deferred: string[];
+};
+export type DashboardMetrics = {
+  status_counts: Record<string, number>;
+  parser_counts: { parser_type: string; count: number }[];
+  extraction_metrics: {
+    total_fields: number;
+    accepted_fields: number;
+    needs_review_fields: number;
+    corrections: number;
+    manually_added_fields: number;
+    avg_ai_confidence: number;
+    avg_review_confidence: number;
+  };
+  review_queue: { id: number; filename: string; status: string; needs_review_fields: number; updated_at: string | null }[];
+  recent_activity: {
+    id: number;
+    document_id: number | null;
+    filename: string;
+    parser_type: string | null;
+    document_status: string | null;
+    action: string;
+    actor: string;
+    details: string;
+    created_at: string | null;
+  }[];
+};
+
+export type TemplateField = { key: string; label: string; data_type: string; required: boolean; aliases: string[]; validation?: Record<string, unknown> };
+export type DocumentTemplate = { key: string; name: string; industry: string; description: string; fields: TemplateField[] };
