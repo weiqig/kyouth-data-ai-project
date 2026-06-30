@@ -1,0 +1,4 @@
+Invoice date: 2026-06-29
+Customer: demo@example.com
+Amount: RM 1,250.00
+Account: 1234567890

@@ -1,0 +1,10 @@
+Purchase Order
+PO Number: PO-7788
+Project Name: Klang Warehouse Extension
+Site Location: Lot 22, Klang Industrial Park
+Supplier Name: Concrete Mix Sdn Bhd
+Requested By: Lim Wei
+Order Date: 2026-06-28
+Delivery Date: 2026-07-05
+Total Amount: RM 45,500.00
+Cost Code: CW-STR-220

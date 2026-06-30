@@ -1,0 +1,11 @@
+Tax Invoice
+Invoice Number: INV-2026-0042
+Supplier Name: ABC Office Supplies Sdn Bhd
+Customer Name: Demo Finance Berhad
+Invoice Date: 2026-06-29
+Due Date: 2026-07-29
+Subtotal: RM 1,180.00
+Tax Amount: RM 70.00
+Total Amount: RM 1,250.00
+Currency: MYR
+Payment Reference: PAY-INV-2026-0042

@@ -1,0 +1,7 @@
+Tax Invoice
+Invoice Number: INV-BAD-100
+Supplier Name: Example Supplier Sdn Bhd
+Invoice Date: 29-06-2026
+Due Date: not-a-date
+Total Amount: RM12A50
+Currency: RMM

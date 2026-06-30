@@ -1,0 +1,22 @@
+[
+  {
+    "raceName": "Kyoto Junior Stakes",
+    "grade": "G3",
+    "year": "First Year",
+    "turn": "11_02",
+    "type": "Turf",
+    "location": "⇒ Kyoto",
+    "length": "Medium",
+    "lengthM": "2000 m"
+  },
+  {
+    "raceName": "Hopeful Stakes",
+    "grade": "G1",
+    "year": "First Year",
+    "turn": "12_02",
+    "type": "Turf",
+    "location": "⇒ Nakayama",
+    "length": "Medium",
+    "lengthM": "2000 m"
+  }
+]

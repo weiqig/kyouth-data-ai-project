@@ -1,0 +1,11 @@
+Progress Claim
+Claim Number: PC-2026-07
+Contract Number: CT-8821
+Project Name: Klang Warehouse Extension
+Contractor Name: BuildRight Construction Sdn Bhd
+Claim Period Start: 2026-06-01
+Claim Period End: 2026-06-30
+Work Completed %: 62%
+Claim Amount: RM 180,000.00
+Retention Amount: RM 9,000.00
+Approved Amount: RM 171,000.00

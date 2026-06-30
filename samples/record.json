@@ -1,0 +1,6 @@
+{
+  "document_type": "invoice",
+  "customer_email": "demo@example.com",
+  "amount": "RM 1,250.00",
+  "date": "2026-06-29"
+}

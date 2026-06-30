@@ -1,0 +1,3 @@
+account_number,account_holder_name,statement_start_date,statement_end_date,opening_balance,closing_balance,total_deposits,total_withdrawals,currency
+1234567890,Demo Finance Berhad,2026-06-01,2026-06-30,RM 10000.00,RM 14250.00,RM 7500.00,RM 3250.00,MYR
+9876543210,Project Holdings Sdn Bhd,2026-06-01,2026-06-30,RM 5000.00,RM 4800.00,RM 1200.00,RM 1400.00,MYR
