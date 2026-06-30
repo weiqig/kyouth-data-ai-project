@@ -50,6 +50,21 @@ services:
       redis:
         condition: service_started
 
+  beat:
+    build: ./backend
+    command: uv run celery -A app.worker.celery_app beat --loglevel=info
+    env_file: ./backend/.env
+    environment:
+      UV_PROJECT_ENVIRONMENT: /opt/venv
+    volumes:
+      - ./backend:/app
+      - backend_uv_cache:/root/.cache/uv
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
   postgres:
     image: postgres:16
     environment:
