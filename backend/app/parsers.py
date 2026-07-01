@@ -118,5 +118,5 @@ def _parse_pdf(content: bytes) -> ParsedDocument:
             pages.append(f'--- Page {page_number} ---\n{page_text.strip()}')
     raw_text = '\n\n'.join(pages).strip()
     if not raw_text:
-        raise ValueError('No selectable text found in PDF. Scanned PDFs/images need OCR and are outside the one-week MVP scope.')
+        raise ValueError('No selectable text found in PDF. Scanned PDFs/images need OCR, which is currently unavailable.')
     return ParsedDocument(raw_text=raw_text, parser_type='pdf_text', normalized_preview=raw_text[:500])
