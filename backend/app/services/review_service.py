@@ -88,6 +88,7 @@ def refresh_document_review_status(db: Session, document_id: int, actor: str = "
     )
 
     if old_status != document.status:
+        document.updated_at = utcnow()
         transition_details = (
             f"Document status changed from {old_status} to {document.status}. "
             f"Approval requires all {total_fields} fields accepted and zero fields needing review; "

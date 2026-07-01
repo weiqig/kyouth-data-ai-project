@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 from sqlalchemy.orm import selectinload
-from ..models import Document, Extraction
+from ..models import AuditLog, Document, Extraction
 from .template_service import get_template_definition
 
 LOAD_OPTIONS = (
     selectinload(Document.extractions).selectinload(Extraction.corrections),
     selectinload(Document.jobs),
     selectinload(Document.ai_reviews),
+    selectinload(Document.audit_logs),
 )
 
 

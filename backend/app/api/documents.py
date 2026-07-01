@@ -8,6 +8,7 @@ from fastapi.responses import Response
 from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 
+from ..ai.controls import utcnow
 from ..db import get_db
 from ..models import AuditLog, Document, DocumentStatus, ProcessingJob
 from ..parsers import UnsupportedDocumentType, parse_raw_text, parse_upload
@@ -189,6 +190,7 @@ def reject_document(document_id: int, payload: RejectDocumentIn, db: Session = D
 
     old_status = doc.status
     doc.status = DocumentStatus.REJECTED.value
+    doc.updated_at = utcnow()
 
     reason_code = payload.reason_code or "other"
     reason_label = rejection_reason_label(reason_code)

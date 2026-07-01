@@ -77,6 +77,7 @@ def add_missing_extraction(document_id: int, payload: AddExtractionIn, db: Sessi
     db.flush()
 
     refresh_document_review_status(db, document_id, actor=payload.added_by)
+    document.updated_at = utcnow()
     db.add(
         AuditLog(
             document_id=document_id,
@@ -171,6 +172,8 @@ def correct_extraction(extraction_id: int, payload: CorrectionIn, db: Session = 
     new_review_confidence = extraction.review_confidence_score
     new_review_status = extraction.review_status
     refresh_document_review_status(db, extraction.document_id, actor=payload.corrected_by)
+    if document:
+        document.updated_at = utcnow()
 
     details = []
     if field_name_changed:
@@ -235,6 +238,8 @@ def accept_extraction(extraction_id: int, payload: AcceptExtractionIn, db: Sessi
     db.flush()
 
     refresh_document_review_status(db, extraction.document_id, actor=payload.accepted_by)
+    if document:
+        document.updated_at = utcnow()
     db.add(
         AuditLog(
             document_id=extraction.document_id,
@@ -291,5 +296,7 @@ def delete_extraction(extraction_id: int, actor: str = "demo_user", db: Session 
         )
     )
     refresh_document_review_status(db, document_id, actor=actor or "demo_user")
+    if document:
+        document.updated_at = utcnow()
     db.commit()
     return {"ok": True, "document_status": document.status if document else None}

@@ -96,6 +96,27 @@ class Document(Base):
                 return self.original_file_data.decode('utf-8-sig', errors='replace')
         return self.raw_text
 
+    @property
+    def latest_action_actor(self) -> str | None:
+        if not self.audit_logs:
+            return None
+        return sorted(self.audit_logs, key=lambda item: (item.created_at or self.created_at, item.id or 0))[-1].actor
+
+    @property
+    def latest_action(self) -> str | None:
+        if not self.audit_logs:
+            return None
+        return sorted(self.audit_logs, key=lambda item: (item.created_at or self.created_at, item.id or 0))[-1].action
+
+    @property
+    def latest_action_at(self):
+        if not self.audit_logs:
+            return None
+        return sorted(self.audit_logs, key=lambda item: (item.created_at or self.created_at, item.id or 0))[-1].created_at
+
+    audit_logs: Mapped[list["AuditLog"]] = relationship(
+        back_populates="document", order_by="AuditLog.created_at", passive_deletes=True
+    )
     extractions: Mapped[list["Extraction"]] = relationship(back_populates="document", cascade="all, delete-orphan")
     jobs: Mapped[list["ProcessingJob"]] = relationship(back_populates="document", cascade="all, delete-orphan")
     ai_reviews: Mapped[list["DocumentAIReview"]] = relationship(
@@ -236,6 +257,8 @@ class AuditLog(Base):
     actor: Mapped[str] = mapped_column(String(120), default="system")
     details: Mapped[str] = mapped_column(Text, default="")
     created_at = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+    document: Mapped[Document | None] = relationship(back_populates="audit_logs")
 
 
 class DocumentAIReview(Base):

@@ -84,6 +84,9 @@ class DocumentOut(BaseModel):
     error_message: str | None = None
     created_at: datetime
     updated_at: datetime | None = None
+    latest_action_actor: str | None = None
+    latest_action: str | None = None
+    latest_action_at: datetime | None = None
     extractions: list[ExtractionOut] = []
     jobs: list[ProcessingJobOut] = []
     ai_reviews: list[DocumentAIReviewOut] = []
