@@ -29,6 +29,9 @@ type DocumentRecord = {
   error_message?: string | null;
   created_at: string;
   updated_at?: string | null;
+  latest_action_actor?: string | null;
+  latest_action?: string | null;
+  latest_action_at?: string | null;
   extractions: Extraction[];
   jobs: ProcessingJob[];
 };
@@ -183,7 +186,8 @@ export default function RecordsPage() {
                   <th>Parser</th>
                   <th>Fields</th>
                   <th>Avg review confidence</th>
-                  <th>Updated</th>
+                  <th>Created at</th>
+                  <th>Updated at</th>
                   <th></th>
                 </tr>
               </thead>
@@ -203,6 +207,7 @@ export default function RecordsPage() {
                       <td>{doc.parser_type}</td>
                       <td>{doc.extractions.length}</td>
                       <td>{avgReviewConfidence === null ? '—' : `${avgReviewConfidence}%`}</td>
+                      <td>{formatDate(doc.created_at)}</td>
                       <td>{formatDate(doc.updated_at || doc.created_at)}</td>
                       <td>
                         <div className="tableActions">

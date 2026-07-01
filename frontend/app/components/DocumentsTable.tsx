@@ -1,7 +1,7 @@
 'use client';
 
-import type { DocumentRecord } from '../lib/types';
-import { fileDisplayName, formatDate, statusLabel } from '../lib/format';
+import type { DocumentRecord } from '../../lib/types';
+import { fileDisplayName, formatDate, statusLabel } from '../../lib/format';
 
 type Props = {
   docs: DocumentRecord[];
@@ -46,17 +46,18 @@ export function DocumentsTable({ docs, query, statusFilter, setQuery, setStatusF
               <tr>
                 <th>File</th>
                 <th>Status</th>
-                <th>Mode</th>
+                <th>Template</th>
                 <th>Parser</th>
-                <th>Latest job</th>
+                <th>Action</th>
                 <th>Fields</th>
-                <th>Created</th>
+                <th>Created at</th>
                 <th></th>
               </tr>
             </thead>
             <tbody>
               {docs.map((doc) => {
-                const latestJob = doc.jobs?.[doc.jobs.length - 1];
+                const latestActor = doc.latest_action_actor || 'system';
+                const latestAction = doc.latest_action ? doc.latest_action.replaceAll('_', ' ') : 'created';
                 return (
                   <tr key={doc.id}>
                     <td>
@@ -66,7 +67,7 @@ export function DocumentsTable({ docs, query, statusFilter, setQuery, setStatusF
                     <td><span className={`badge status-${doc.status}`}>{statusLabel(doc.status)}</span></td>
                     <td>{doc.extraction_mode === 'discovery' ? <span className="muted">Discovery</span> : doc.document_type_label || <span className="muted">Auto-detect</span>}</td>
                     <td>{doc.parser_type}</td>
-                    <td>{latestJob ? <span className="badge">{latestJob.status}</span> : <span className="muted">none</span>}</td>
+                    <td><span className="muted compact"><strong>{latestActor}</strong></span></td>
                     <td>{doc.extractions.length}</td>
                     <td>{formatDate(doc.created_at)}</td>
                     <td><a className="rowAction" href={`/documents/${doc.id}`}>{doc.status === 'approved' ? 'View' : 'Review'}</a></td>

@@ -2,8 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { AuditTimeline } from '../../../components/AuditTimeline';
-import { DocumentPreview } from '../../../components/DocumentPreview';
+import { AuditTimeline } from '../../components/AuditTimeline';
+import { DocumentPreview } from '../../components/DocumentPreview';
 import { formatDate, statusLabel } from '../../../lib/format';
 import { cleanExtractionReason, confidenceLabel, confidenceTier, extractionModeLabel, extractAiRunMetadata, reviewStatusLabel, sourceForExtraction } from '../../../lib/documentReview';
 import type { DocumentAIReview, DocumentRecord, Extraction } from '../../../lib/types';
@@ -463,6 +463,7 @@ export default function DocumentPage() {
       </div>
 
       <AuditTimeline logs={sortedAuditLogs} />
+      <button className="floatingTopButton" type="button" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>↑ Top</button>
     </main>
   );
 }

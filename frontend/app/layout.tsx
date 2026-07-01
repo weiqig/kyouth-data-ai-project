@@ -13,7 +13,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <header className="topNav">
           <a className="brandLink" href="/">Audit Pipeline</a>
           <nav>
-            <a href="/">Upload</a>
             <a href="/records">Database Records</a>
           </nav>
         </header>

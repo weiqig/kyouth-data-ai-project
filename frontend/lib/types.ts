@@ -58,6 +58,9 @@ export type DocumentRecord = {
   error_message?: string | null;
   created_at: string;
   updated_at?: string | null;
+  latest_action_actor?: string | null;
+  latest_action?: string | null;
+  latest_action_at?: string | null;
   extractions: Extraction[];
   jobs: ProcessingJob[];
   ai_reviews: DocumentAIReview[];

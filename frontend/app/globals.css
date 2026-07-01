@@ -846,3 +846,23 @@ tr:last-child td { border-bottom: 0; }
   font-size: 0.78rem;
   line-height: 1.35;
 }
+
+
+.floatingTopButton {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 40;
+  border: 1px solid #d0d5dd;
+  border-radius: 999px;
+  background: #101828;
+  color: white;
+  padding: 10px 14px;
+  font-weight: 800;
+  box-shadow: 0 12px 30px rgba(16, 24, 40, 0.22);
+  cursor: pointer;
+}
+.floatingTopButton:hover { background: #344054; }
+@media (max-width: 640px) {
+  .floatingTopButton { right: 14px; bottom: 14px; padding: 9px 12px; }
+}

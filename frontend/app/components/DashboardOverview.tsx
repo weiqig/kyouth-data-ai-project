@@ -1,7 +1,7 @@
 'use client';
 
-import type { DashboardMetrics } from '../lib/types';
-import { actionLabel, formatShortDate, pct, statusLabel } from '../lib/format';
+import type { DashboardMetrics } from '../../lib/types';
+import { actionLabel, formatShortDate, pct, statusLabel } from '../../lib/format';
 
 type Props = {
   metrics: DashboardMetrics | null;
@@ -18,7 +18,7 @@ export function DashboardOverview({ metrics, stats, onStatusFilter, onParserFilt
     <section className="card activityCard">
       <div className="sectionHeader">
         <div>
-          <h2>Live processing overview</h2>
+          <h2>Analytics Dashboard</h2>
         </div>
       </div>
 
@@ -61,7 +61,6 @@ export function DashboardOverview({ metrics, stats, onStatusFilter, onParserFilt
         <div>
           <div className="inlineSectionHeader">
             <h3>Document types processed</h3>
-            {parserCounts.length > 0 && <button className="textButton" onClick={() => onParserFilter('')}>Show all</button>}
           </div>
           {parserCounts.length > 0 ? (
             <div className="parserMetricsList">

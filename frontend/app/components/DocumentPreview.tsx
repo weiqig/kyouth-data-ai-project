@@ -1,8 +1,8 @@
 'use client';
 
 import { RefObject } from 'react';
-import type { DocumentRecord, Extraction } from '../lib/types';
-import { confidenceLabel, confidenceTier, csvRows, parserLabel, prettyJson, sourceForExtraction, splitByHighlight } from '../lib/documentReview';
+import type { DocumentRecord, Extraction } from '../../lib/types';
+import { confidenceLabel, confidenceTier, csvRows, parserLabel, prettyJson, sourceForExtraction, splitByHighlight } from '../../lib/documentReview';
 
 type Props = {
   doc: DocumentRecord;

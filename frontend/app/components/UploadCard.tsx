@@ -1,6 +1,6 @@
 'use client';
 
-import type { Capabilities, DocumentTemplate } from '../lib/types';
+import type { Capabilities, DocumentTemplate } from '../../lib/types';
 
 type Props = {
   rawText: string;

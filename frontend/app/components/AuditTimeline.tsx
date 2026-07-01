@@ -1,7 +1,5 @@
 'use client';
 
-import { formatDate } from '../lib/format';
-
 type AuditLog = { id: number; action: string; actor: string; details: string; created_at: string };
 
 function formatAuditTime(value?: string | null) {
@@ -30,7 +28,6 @@ export function AuditTimeline({ logs }: { logs: AuditLog[] }) {
               <div className="auditContent">
                 <strong>{log.action}</strong> <span className="muted">by {log.actor}</span>
                 <p>{log.details}</p>
-                <span className="muted compact">{formatDate(log.created_at)}</span>
               </div>
             </div>
           );

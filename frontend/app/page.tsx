@@ -1,9 +1,9 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { DashboardOverview } from '../components/DashboardOverview';
-import { DocumentsTable } from '../components/DocumentsTable';
-import { UploadCard } from '../components/UploadCard';
+import { DashboardOverview } from './components/DashboardOverview';
+import { DocumentsTable } from './components/DocumentsTable';
+import { UploadCard } from './components/UploadCard';
 import { fileDisplayName } from '../lib/format';
 import type { Capabilities, DashboardMetrics, DocumentRecord, DocumentTemplate } from '../lib/types';
 
