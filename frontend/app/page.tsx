@@ -23,7 +23,7 @@ export default function Home() {
   const [statusFilter, setStatusFilter] = useState('all');
 
   async function loadDocs() {
-    const res = await fetch(`${API}/documents?include_rejected=true`, { cache: 'no-store' });
+    const res = await fetch(`${API}/documents`, { cache: 'no-store' });
     if (res.ok) setDocs(await res.json());
   }
 

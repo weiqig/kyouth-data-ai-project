@@ -216,7 +216,8 @@ export default function DocumentPage() {
   const allFieldsResolved = doc.extractions.length > 0 && doc.extractions.every((x) => x.accepted && !x.needs_review);
   const effectiveStatus = doc.status === 'needs_review' && allFieldsResolved ? 'approved' : doc.status;
   const isRejected = effectiveStatus === 'rejected';
-  const canReject = effectiveStatus === 'pending' || effectiveStatus === 'needs_review';
+  const isAutoDetect = doc.extraction_mode === 'auto_detect';
+  const canReject = !isRejected && (effectiveStatus === 'pending' || effectiveStatus === 'needs_review' || (isAutoDetect && effectiveStatus === 'approved'));
   const modeLabel = doc.extraction_mode === 'discovery'
     ? 'Free Extraction — no template'
     : doc.document_type_label

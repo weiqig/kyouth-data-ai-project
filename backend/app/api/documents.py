@@ -27,7 +27,7 @@ REJECTION_REASONS = [
     {"code": "unsupported_format", "label": "Unsupported or unreadable content", "description": "The file content cannot be reliably processed within the current MVP scope."},
     {"code": "duplicate_document", "label": "Duplicate document", "description": "The document appears to duplicate a record that already exists."},
     {"code": "poor_data_quality", "label": "Poor data quality", "description": "The document is too incomplete, inconsistent, or unclear to review confidently."},
-    {"code": "other", "label": "Other", "description": "A custom rejection reason is provided by the reviewer."},
+    {"code": "other", "label": "Other", "description": "A custom rejection provided by the reviewer."},
 ]
 
 def rejection_reason_label(code: str | None) -> str:
@@ -134,15 +134,13 @@ def list_documents(
     status: str | None = Query(default=None, description="Filter by document review status: pending, needs_review, approved, rejected, or error."),
     q: str | None = Query(default=None, description="Search filename, content type, parser type, error message, or raw text."),
     limit: int = Query(default=100, ge=1, le=500),
-    include_rejected: bool = Query(default=False, description="Include rejected records. Main dashboard keeps these hidden; database records page can enable this."),
     db: Session = Depends(get_db),
 ):
     stmt = select(Document).options(*LOAD_OPTIONS)
 
     if status and status != "all":
         stmt = stmt.where(Document.status == status)
-    elif not include_rejected:
-        stmt = stmt.where(Document.status != DocumentStatus.REJECTED.value)
+
 
     if q and q.strip():
         term = f"%{q.strip()}%"
@@ -178,15 +176,19 @@ def reject_document(document_id: int, payload: RejectDocumentIn, db: Session = D
     if not doc:
         raise HTTPException(status_code=404, detail="Document not found")
 
-    # Recalculate first so stale needs_review rows cannot be rejected after all
-    # extracted fields have already been accepted.
-    if doc.status in {DocumentStatus.NEEDS_REVIEW.value, DocumentStatus.APPROVED.value}:
+    is_auto_detect = doc.extraction_mode == "auto_detect"
+
+    if not is_auto_detect and doc.status in {DocumentStatus.NEEDS_REVIEW.value, DocumentStatus.APPROVED.value}:
         refresh_document_review_status(db, document_id, actor="system")
         db.flush()
         doc = db.scalar(select(Document).where(Document.id == document_id).options(*LOAD_OPTIONS))
 
-    if doc.status not in {DocumentStatus.PENDING.value, DocumentStatus.NEEDS_REVIEW.value}:
-        raise HTTPException(status_code=409, detail="Only pending or needs_review documents can be rejected.")
+    allowed_statuses = {DocumentStatus.PENDING.value, DocumentStatus.NEEDS_REVIEW.value}
+    if is_auto_detect:
+        allowed_statuses.add(DocumentStatus.APPROVED.value)
+
+    if doc.status not in allowed_statuses:
+        raise HTTPException(status_code=409, detail="This document cannot be rejected from its current state.")
 
     old_status = doc.status
     doc.status = DocumentStatus.REJECTED.value

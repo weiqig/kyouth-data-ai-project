@@ -46,21 +46,6 @@ class ExtractedField:
     source_column_name: str | None = None
 
 
-def _source_span(text: str, value: str) -> tuple[int | None, int | None]:
-    if not value:
-        return None, None
-    idx = text.lower().find(value.lower())
-    if idx < 0:
-        return None, None
-    return idx, idx + len(value)
-
-
-def _line_number_for_offset(text: str, offset: int | None) -> int | None:
-    if offset is None or offset < 0:
-        return None
-    return text.count('\n', 0, offset) + 1
-
-
 def _snippet(text: str, value: str, width: int = 120) -> str:
     if not value:
         return text[:width]

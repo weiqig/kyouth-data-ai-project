@@ -72,11 +72,9 @@ export default function RecordsPage() {
     if (status !== 'all') params.set('status', status);
     if (debouncedSearch) params.set('q', debouncedSearch);
     params.set('limit', '200');
-    params.set('include_rejected', 'true');
 
     const totalsParams = new URLSearchParams();
     totalsParams.set('limit', '200');
-    totalsParams.set('include_rejected', 'true');
 
     try {
       const [recordsRes, totalsRes] = await Promise.all([
@@ -145,7 +143,7 @@ export default function RecordsPage() {
           <div>
             <h2>Record filters</h2>
           </div>
-          <button className="secondaryButton" onClick={() => loadRecords()} disabled={loading}>{loading ? 'Loading...' : 'Refresh'}</button>
+          <button className="secondaryButton" onClick={() => loadRecords()}>{loading ? 'Loading...' : 'Refresh'}</button>
         </div>
 
         <div className="recordsToolbar">
