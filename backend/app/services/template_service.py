@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from functools import lru_cache
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable
@@ -38,10 +39,11 @@ def _normalize_key(value: str) -> str:
     return "".join(ch.lower() if ch.isalnum() else "_" for ch in value).strip("_")
 
 
-def load_template_files() -> list[TemplateDefinition]:
+@lru_cache(maxsize=1)
+def load_template_files() -> tuple[TemplateDefinition, ...]:
     templates: list[TemplateDefinition] = []
     if not TEMPLATE_DIR.exists():
-        return templates
+        return tuple(templates)
     for path in sorted(TEMPLATE_DIR.glob("*.json")):
         data = json.loads(path.read_text(encoding="utf-8"))
         fields: list[TemplateField] = []
@@ -63,7 +65,7 @@ def load_template_files() -> list[TemplateDefinition]:
             aliases=[str(alias) for alias in data.get("aliases", [])],
             fields=fields,
         ))
-    return templates
+    return tuple(templates)
 
 
 def seed_document_templates(db: Session) -> None:
